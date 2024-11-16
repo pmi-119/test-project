@@ -1,13 +1,11 @@
 package main
 
 import (
+	"net/http"
+
 	"file-structure/internal/api"
 	"file-structure/internal/repository"
 	"file-structure/internal/service"
-	"fmt"
-	"log"
-	"net/http"
-	"strconv"
 )
 
 // компилируемые (go, c, c++, java)
@@ -20,42 +18,18 @@ func main() {
 
 	handler := api.New(srv)
 
-	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
-		switch r.Method {
+	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) { // ответ, запрос
+		switch r.Method { // метод получения
 		case http.MethodGet:
-			w.WriteHeader(http.StatusOK)
-			w.Write([]byte("Hello GET!!"))
-		case http.MethodPost:
+			w.WriteHeader(http.StatusOK)   //статус 200 300 400 500
+			w.Write([]byte("Hello GET!!")) //запись сообщения
+		case http.MethodPost: //метод добавить
 			w.WriteHeader(http.StatusCreated)
 			w.Write([]byte("Hello POST!!"))
 		}
 	})
 
-	http.HandleFunc("/user/{id}", func(w http.ResponseWriter, r *http.Request) {
-		switch r.Method {
-		case http.MethodGet:
-			_ = r.PathValue("id")
-
-			a := r.URL.Query().Get("a")
-			b := r.URL.Query().Get("b")
-			log.Println(a, b)
-			aInt, err := strconv.Atoi(a)
-			if err != nil {
-				w.WriteHeader(http.StatusBadRequest)
-				w.Write([]byte(err.Error()))
-				return
-			}
-			bInt, err := strconv.Atoi(b)
-			if err != nil {
-				w.WriteHeader(http.StatusBadRequest)
-				w.Write([]byte(err.Error()))
-				return
-			}
-			res := handler.Handle(aInt, bInt)
-			w.WriteHeader(http.StatusOK)
-			w.Write([]byte(fmt.Sprintf("%d", res)))
-		}
-	})
+	http.HandleFunc("/user/{id}", handler.Handler)
 
 	//fmt.Println(res)
 
